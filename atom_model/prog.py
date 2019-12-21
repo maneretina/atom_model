@@ -101,6 +101,8 @@ def main():
 
 
 def levels(levels_list,name,data):
+    ''' Функция читает названия уровней, если названия двух соседних уровней совпадают (но различается проекция спина), уровни объединяются. В итоге получаем список    уникальных уровней, g-факторы и энергии ионизации  '''
+    
     count_flag = False
     for i in range(len(dat)-1):
         if count_flag:
@@ -130,6 +132,7 @@ def levels(levels_list,name,data):
 
 
 def transitions1(kur_transitions,loggf, name1,name2,j1,j2,lower_level, upper_level):
+    '''Сравниваем названия уровней из списка list_of_transitions.dat и данных Куруца. Если названия как нижнего, так и верхнего уровней совпадают, записываем итоговые уровни и информацию о них в отдельный файл kur_transitios.dat (здесь еще уровни не объединены) '''
     for i in range(len(kur)-1):
         for k in range(len(transitions)-1):   
             if all([name1[i]==lower_level[k],name2[i]==upper_level[k]]):
