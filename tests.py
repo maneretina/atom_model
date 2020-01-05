@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
-#author Zheltoukhov Sergey 
+#author Neretina Maria
 import unittest
 import numpy as np
 import pandas as pd
