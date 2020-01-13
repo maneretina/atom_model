@@ -20,6 +20,48 @@ dat = np.loadtxt(join(path, 'k1_nist.dat'), dtype=str)
 
 kur = np.loadtxt(join(path, 'kuruzc.dat'), dtype=str)
 
+
+def levels(levels_list, name, data):
+    '''
+    Функция читает названия уровней, если названия двух соседних уровней совпадают
+    (но различается проекция спина), уровни объединяются. В итоге получаем список
+     уникальных уровней, g-факторы и энергии ионизации
+     '''
+
+    count_flag = False
+    for i in range(len(dat) - 1):
+        if count_flag:
+            count_flag = False
+            continue
+        if name[i] == name[i + 1]:
+            # print(name[i])
+            g_sum = (2 * data[i, 0] + 1) + (2 * data[i + 1, 0] + 1)
+            en = (((2 * data[i, 0] + 1) * data[i, 1] + (2 * data[i + 1, 0] + 1) * data[
+                i + 1, 1]) / ((2 * data[i, 0] + 1) + (2 * data[i + 1, 0] + 1)))
+            levels_list = levels_list.append({'name': name[i], 'g': g_sum, 'e': en},
+                                             ignore_index=True)
+            count_flag = True
+        else:
+            levels_list = levels_list.append(
+                {'name': name[i], 'g': 2 * data[i, 0] + 1, 'e': data[i, 1]}, ignore_index=True)
+    # print(levels_list)
+
+    e = levels_list['e']
+    # print(e)
+
+    nu = 0.2997925 * (ion - e) * 100000000000
+    # print(nu)
+    levels_list['energy'] = nu
+    # print(levels_list)
+    del levels_list['e']
+    # print(levels_list)
+
+    return levels_list
+
+
+
+
+
 available_trans_ = {
    's': ['p'],
    'p': ['s', 'd'],
@@ -73,7 +115,7 @@ def main():
 
     levels_list.to_csv('levels_list.dat', sep='\t', index=False)
 
-    transitions = pd.DataFrame(list(filter(check_transition, combinations(levels_list['name'], 2))))  #Из всех возможных комбинаций уровней, выбираем разрешенные  правилами отбора
+    transitions = pd.DataFrame(list(filter(check_transition, combinations(levels_list['name'], 2))))  #Из всех возможных комбинаций уровней, выбираем разрешенные       правилами отбора
     print(transitions)
 
     lower_level = transitions.iloc[:, 0]
@@ -104,46 +146,6 @@ def main():
 
     loggf = kur_transitions['loggf']
     kur_transitions.to_csv('kur_transitions.dat', sep='\t', index=False)
-
-def levels(levels_list, name, data):
-    '''
-    Функция читает названия уровней, если названия двух соседних уровней совпадают
-    (но различается проекция спина), уровни объединяются. В итоге получаем список
-     уникальных уровней, g-факторы и энергии ионизации
-     '''
-
-    count_flag = False
-    for i in range(len(dat) - 1):
-        if count_flag:
-            count_flag = False
-            continue
-        if name[i] == name[i + 1]:
-            # print(name[i])
-            g_sum = (2 * data[i, 0] + 1) + (2 * data[i + 1, 0] + 1)
-            en = (((2 * data[i, 0] + 1) * data[i, 1] + (2 * data[i + 1, 0] + 1) * data[
-                i + 1, 1]) / ((2 * data[i, 0] + 1) + (2 * data[i + 1, 0] + 1)))
-            levels_list = levels_list.append({'name': name[i], 'g': g_sum, 'e': en},
-                                             ignore_index=True)
-            count_flag = True
-        else:
-            levels_list = levels_list.append(
-                {'name': name[i], 'g': 2 * data[i, 0] + 1, 'e': data[i, 1]}, ignore_index=True)
-    # print(levels_list)
-
-    e = levels_list['e']
-    # print(e)
-
-    nu = 0.2997925 * (ion - e) * 100000000000
-    # print(nu)
-    levels_list['energy'] = nu
-    # print(levels_list)
-    del levels_list['e']
-    # print(levels_list)
-
-    return levels_list
-
-
-
 
 
 if __name__ == '__main__':
